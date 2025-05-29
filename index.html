@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lake Piru Storage Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Lake Piru Reservoir Storage</h1>
+    <p>Data from USGS site 11109700 (LK PIRU NR PIRU CA)</p>
+
+    <!-- Add this to your HTML where you want the controls to appear -->
+<div id="timePeriodControls" style="margin-bottom: 1em;">
+    <label for="timePeriodSelect">Show data for: </label>
+    <select id="timePeriodSelect">
+        <option value="P1D">1 Day</option>
+        <option value="P7D">7 Days</option>
+        <option value="P30D">30 Days</option>
+        <option value="P3M" selected>3 Months</option>
+        <option value="P6M">6 Months</option>
+        <option value="P1Y">1 Year</option>
+        <option value="P5Y">5 Years</option>
+        <option value="P10Y">10 Years</option>
+        <option value="P20Y">20 Years</option>
+        <option value="P30Y">All</option>
+    </select>
+</div>
+
+    <div id="currentSummary" class="current-storage-summary"></div>
+
+    <div id="loadingMessage">Loading data...</div>
+    <div id="lakePiruStorage">
+        </div>
+
+    
+
+    <script src="script.js"></script>
+</body>
+</html>
