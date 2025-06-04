@@ -101,9 +101,7 @@ async function fetchLakePiruStorage(timePeriod = 'P3M') {
     }
 }
 
-// ...existing code...
-
-// Add a new function to fetch and display discharge data for Piru Creek below Santa Felicia Dam
+// function to fetch and display discharge data for Piru Creek below Santa Felicia Dam
 async function fetchPiruCreekDischarge(timePeriod = 'P3M') {
     const siteId = '11109800'; // PIRU CREEK BLW SANTA FELICIA DAM CA
     const parameterCode = '00060'; // Discharge, cubic feet per second
@@ -204,5 +202,3 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchPiruCreekDischarge();
     }
 });
-
-// ...existing code...
