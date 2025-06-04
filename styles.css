@@ -30,3 +30,14 @@ th {
 .current-storage-summary span {
     color: #007bff; /* Highlight the actual value */
 }
+
+.discharge-summary {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.discharge-summary span {
+    color: #28a745; /* Use a different highlight color for discharge, e.g., green */
+}

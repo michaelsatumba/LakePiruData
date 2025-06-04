@@ -101,16 +101,108 @@ async function fetchLakePiruStorage(timePeriod = 'P3M') {
     }
 }
 
-// Listen for changes to the time period select
+// ...existing code...
+
+// Add a new function to fetch and display discharge data for Piru Creek below Santa Felicia Dam
+async function fetchPiruCreekDischarge(timePeriod = 'P3M') {
+    const siteId = '11109800'; // PIRU CREEK BLW SANTA FELICIA DAM CA
+    const parameterCode = '00060'; // Discharge, cubic feet per second
+
+    const apiUrl = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&monitoring_location_id=USGS-${siteId}&parameter_code=${parameterCode}&time=${timePeriod}`;
+
+    const loadingMessage = document.getElementById('dischargeLoadingMessage');
+    const dischargeDataContainer = document.getElementById('piruCreekDischarge');
+
+    loadingMessage.textContent = 'Loading discharge data...';
+    dischargeDataContainer.innerHTML = '';
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        loadingMessage.style.display = 'none';
+
+        if (data.features && data.features.length > 0) {
+            // Sort data by date (most recent first)
+            data.features.sort((a, b) => new Date(b.properties.time) - new Date(a.properties.time));
+
+            // Get the most recent discharge value for the summary
+            const latestDischarge = parseFloat(data.features[0].properties.value);
+            const latestDate = new Date(data.features[0].properties.time);
+
+            let summaryHTML = `
+                <div class="discharge-summary">
+                As of ${latestDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'})},
+                Piru Creek below Santa Felicia Dam discharge is
+                <span>${latestDischarge.toLocaleString()} ft³/s</span>.
+                </div>
+                `;
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Discharge (ft³/s)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.features.forEach(feature => {
+                const properties = feature.properties;
+                const timestamp = new Date(properties.time);
+                const dateString = timestamp.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                const value = parseFloat(properties.value);
+                const status = properties.approval_status;
+
+                tableHTML += `
+                    <tr>
+                        <td>${dateString}</td>
+                        <td>${value.toLocaleString()}</td>
+                        <td>${status}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            dischargeDataContainer.innerHTML = summaryHTML + tableHTML;
+        } else {
+            dischargeDataContainer.innerHTML = '<p>No discharge data found for Piru Creek in the selected period.</p>';
+        }
+    } catch (error) {
+        console.error('Error fetching Piru Creek discharge data:', error);
+        loadingMessage.style.display = 'none';
+        dischargeDataContainer.innerHTML = `<p style="color: red;">Failed to load discharge data: ${error.message}</p>`;
+    }
+}
+
+// Listen for changes to the time period select for discharge table
 document.addEventListener('DOMContentLoaded', () => {
     const select = document.getElementById('timePeriodSelect');
     if (select) {
         select.addEventListener('change', () => {
             fetchLakePiruStorage(select.value);
+            fetchPiruCreekDischarge(select.value);
         });
         fetchLakePiruStorage(select.value); // Initial load
+        fetchPiruCreekDischarge(select.value); // Initial load
     } else {
-        fetchLakePiruStorage(); // Fallback if select not found
+        fetchLakePiruStorage();
+        fetchPiruCreekDischarge();
     }
 });
-// change
+
+// ...existing code...
