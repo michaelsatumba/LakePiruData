@@ -1,22 +1,35 @@
 body {
     font-family: sans-serif;
     margin: 20px;
+    background-color: #181a1b;
+    color: #e0e0e0;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: #232526;
+    color: #e0e0e0;
 }
 
 th, td {
-    border: 1px solid #ddd;
+    border: 1px solid #333;
     padding: 8px;
     text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: #222326;
+    color: #f8f8f8;
+}
+
+tr:nth-child(even) {
+    background-color: #202224;
+}
+
+tr:nth-child(odd) {
+    background-color: #232526;
 }
 
 /* Style for current storage display */
@@ -24,20 +37,37 @@ th {
     font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #333;
+    color: #e0e0e0;
 }
 
 .current-storage-summary span {
-    color: #007bff; /* Highlight the actual value */
+    color: #4da3ff; /* Highlight the actual value */
 }
 
 .discharge-summary {
     font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #333;
+    color: #e0e0e0;
 }
 
 .discharge-summary span {
-    color: #28a745; /* Use a different highlight color for discharge, e.g., green */
+    color: #4dd17c; /* Use a different highlight color for discharge, e.g., green */
+}
+
+/* Miscellaneous */
+a {
+    color: #4da3ff;
+}
+
+#timePeriodControls label,
+#timePeriodControls select {
+    color: #e0e0e0;
+    background: #232526;
+    border: 1px solid #333;
+}
+
+#timePeriodControls select {
+    padding: 4px 8px;
+    border-radius: 4px;
 }
