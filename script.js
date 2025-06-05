@@ -32,6 +32,16 @@ async function fetchLakePiruStorage(timePeriod = 'P3M') {
             const latestDate = new Date(data.features[0].properties.time);
             const percentCapacity = ((latestStorage / LAKE_PIRU_CAPACITY_ACFT) * 100).toFixed(1);
 
+            const gaugeContainer = document.getElementById('lakePiruGauge');
+            gaugeContainer.innerHTML = `
+            <div class="gauge-labels">
+                <span>E</span>
+                <span>F</span>
+            </div>
+            <div class="gauge-percent">${percentCapacity}%</div>
+            <div class="gauge-fill" style="width: ${percentCapacity}%;"></div>
+            `;
+
             // Check if data is stale (older than 7 days)
             const today = new Date();
             const daysOld = Math.floor((today - latestDate) / (1000 * 60 * 60 * 24));
