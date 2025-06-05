@@ -1,10 +1,15 @@
 const LAKE_PIRU_CAPACITY_ACFT = 83240; // Approximate full capacity of Lake Piru in acre-feet
 
-async function fetchLakePiruStorage(timePeriod = 'P3M') {
+// Helper to format date as YYYY-MM-DD
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
+}
+
+async function fetchLakePiruStorageByRange(startDate, endDate) {
     const siteId = '11109700'; // LK PIRU NR PIRU CA
     const parameterCode = '00054'; // Reservoir storage, acre-feet
 
-    const apiUrl = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&monitoring_location_id=USGS-${siteId}&parameter_code=${parameterCode}&time=${timePeriod}`;
+    const apiUrl = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&monitoring_location_id=USGS-${siteId}&parameter_code=${parameterCode}&time=${startDate}/${endDate}`;
 
     const loadingMessage = document.getElementById('loadingMessage');
     const storageDataContainer = document.getElementById('lakePiruStorage');
@@ -112,11 +117,11 @@ async function fetchLakePiruStorage(timePeriod = 'P3M') {
 }
 
 // function to fetch and display discharge data for Piru Creek below Santa Felicia Dam
-async function fetchPiruCreekDischarge(timePeriod = 'P3M') {
+async function fetchPiruCreekDischargeByRange(startDate, endDate) {
     const siteId = '11109800'; // PIRU CREEK BLW SANTA FELICIA DAM CA
     const parameterCode = '00060'; // Discharge, cubic feet per second
 
-    const apiUrl = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&monitoring_location_id=USGS-${siteId}&parameter_code=${parameterCode}&time=${timePeriod}`;
+    const apiUrl = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&monitoring_location_id=USGS-${siteId}&parameter_code=${parameterCode}&time=${startDate}/${endDate}`;
 
     const loadingMessage = document.getElementById('dischargeLoadingMessage');
     const dischargeDataContainer = document.getElementById('piruCreekDischarge');
@@ -197,18 +202,29 @@ async function fetchPiruCreekDischarge(timePeriod = 'P3M') {
     }
 }
 
-// Listen for changes to the time period select for discharge table
+// Listen for date range changes
 document.addEventListener('DOMContentLoaded', () => {
-    const select = document.getElementById('timePeriodSelect');
-    if (select) {
-        select.addEventListener('change', () => {
-            fetchLakePiruStorage(select.value);
-            fetchPiruCreekDischarge(select.value);
-        });
-        fetchLakePiruStorage(select.value); // Initial load
-        fetchPiruCreekDischarge(select.value); // Initial load
-    } else {
-        fetchLakePiruStorage();
-        fetchPiruCreekDischarge();
-    }
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    const fetchBtn = document.getElementById('fetchDataBtn');
+
+    // Set default dates (last 3 months)
+    const today = new Date();
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(today.getMonth() - 3);
+    startInput.value = formatDate(threeMonthsAgo);
+    endInput.value = formatDate(today);
+
+    fetchBtn.addEventListener('click', () => {
+        const start = startInput.value;
+        const end = endInput.value;
+        if (start && end && start <= end) {
+            fetchLakePiruStorageByRange(start, end);
+            fetchPiruCreekDischargeByRange(start, end);
+        }
+    });
+
+    // Initial load
+    fetchLakePiruStorageByRange(startInput.value, endInput.value);
+    fetchPiruCreekDischargeByRange(startInput.value, endInput.value);
 });

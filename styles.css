@@ -128,3 +128,35 @@ a {
     font-size: 1.1em;
     letter-spacing: 1px;
 }
+
+/* Dark theme for date inputs and button */
+#startDate, #endDate {
+    background: #fff;
+    color: #000;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 0 6px 12px 0;
+    font-size: 1rem;
+}
+
+#startDate:focus, #endDate:focus {
+    outline: 2px solid #4a90e2;
+}
+
+#fetchDataBtn {
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 14px 32px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: background 0.2s;
+}
+
+#fetchDataBtn:hover {
+    background: #357ab8;
+}
