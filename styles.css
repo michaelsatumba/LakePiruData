@@ -160,3 +160,9 @@ a {
 #fetchDataBtn:hover {
     background: #357ab8;
 }
+
+.chart-container {
+    position: relative; 
+    height:60vh; 
+    margin: 20px auto;
+}

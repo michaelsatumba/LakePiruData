@@ -14,10 +14,25 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
     const loadingMessage = document.getElementById('loadingMessage');
     const storageDataContainer = document.getElementById('lakePiruStorage');
     const currentSummaryDiv = document.getElementById('currentSummary');
+    const chartCanvas = document.getElementById('lakePiruStorageChart'); // Get the canvas element
 
     loadingMessage.textContent = 'Loading data...';
     storageDataContainer.innerHTML = ''; // Clear previous table data
     currentSummaryDiv.innerHTML = ''; // Clear previous summary data
+
+    // Ensure the canvas context is available before trying to create a chart
+    if (!chartCanvas) {
+        console.error('Chart canvas element not found!');
+        loadingMessage.textContent = 'Error: Chart display area missing.';
+        return; // Exit if the canvas isn't there
+    }
+    const ctx = chartCanvas.getContext('2d');
+    if (!ctx) {
+        console.error('Could not get 2D context from canvas!');
+        loadingMessage.textContent = 'Error: Chart rendering context missing.';
+        return; // Exit if context isn't available
+    }
+
 
     try {
         const response = await fetch(apiUrl);
@@ -64,6 +79,97 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
                 which is <span style="font-size:1.1em;">${percentCapacity}%</span> of its capacity.
             `;
 
+            // Prepare data for Chart.js
+            // Filter out any data points with null or undefined values if necessary
+            const chartData = data.features
+                .filter(feature => feature.properties.value !== null && feature.properties.value !== undefined)
+                .map(feature => ({
+                    x: new Date(feature.properties.time),
+                    y: feature.properties.value
+                })).reverse(); // Reverse to have oldest data first for the chart
+
+            // Destroy existing chart if it exists and is a valid Chart instance
+            if (lakePiruStorageChart instanceof Chart) { // Use instanceof for robust checking
+                lakePiruStorageChart.destroy();
+                lakePiruStorageChart = null; // Reset to null after destruction
+            }
+
+            // Only create the chart if there is data to display
+             if (chartData.length > 0) {
+                lakePiruStorageChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Lake Piru Storage (Acre-Feet)',
+                            data: chartData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    // CHANGE D to d HERE:
+                                    tooltipFormat: 'MMM d, yyyy', // Changed 'MMM D, yyyy' to 'MMM d, yyyy'
+                                    displayFormats: {
+                                        // CHANGE D to d HERE:
+                                        day: 'MMM d', // Changed 'MMM D' to 'MMM d'
+                                        month: 'MMM yyyy',
+                                        year: 'yyyy'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Storage (Acre-Feet)'
+                                },
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toLocaleString() + ' ac-ft';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                storageDataContainer.innerHTML = '<p>No valid storage data found for Lake Piru in the selected period to display on chart.</p>';
+                if (lakePiruStorageChart instanceof Chart) {
+                    lakePiruStorageChart.destroy();
+                    lakePiruStorageChart = null;
+                }
+            }
+
+
             let tableHTML = `
                 <table>
                     <thead>
@@ -106,6 +212,10 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
             storageDataContainer.innerHTML = tableHTML;
         } else {
             storageDataContainer.innerHTML = '<p>No reservoir storage data found for Lake Piru in the selected period.</p>';
+            if (lakePiruStorageChart instanceof Chart) { // Check before destroying
+                lakePiruStorageChart.destroy();
+                lakePiruStorageChart = null;
+            }
         }
 
     } catch (error) {
@@ -113,6 +223,10 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
         loadingMessage.style.display = 'none';
         currentSummaryDiv.innerHTML = '';
         storageDataContainer.innerHTML = `<p style="color: red;">Failed to load data: ${error.message}</p>`;
+        if (lakePiruStorageChart instanceof Chart) { // Check before destroying
+            lakePiruStorageChart.destroy();
+            lakePiruStorageChart = null;
+        }
     }
 }
 

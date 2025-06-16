@@ -9,26 +9,14 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
     <h1>Lake Piru Storage Data and Flow Rate</h1>
     <p>Data from USGS site 11109700 (LK PIRU NR PIRU CA)</p>
 
-    <!-- Add this to your HTML where you want the controls to appear -->
 <div id="timePeriodControls" style="margin-bottom: 1em;">
-    <!-- <select id="timePeriodSelect">
-        <option value="P1D">1 Day</option>
-        <option value="P7D">7 Days</option>
-        <option value="P30D">30 Days</option>
-        <option value="P3M" selected>3 Months</option>
-        <option value="P6M">6 Months</option>
-        <option value="P1Y">1 Year</option>
-        <option value="P2Y">2 Years</option>
-        <option value="P5Y">5 Years</option>
-        <option value="P10Y">10 Years</option>
-        <option value="P20Y">20 Years</option>
-        <option value="P30Y">All</option>
-    </select> -->
     <label for="startDate">Start date:</label>
     <input type="date" id="startDate">
     <label for="endDate">End date:</label>
@@ -40,6 +28,11 @@
     <div id="lakePiruGauge" class="gauge-bar"></div>
 
     <div id="loadingMessage">Loading data...</div>
+
+    <div class="chart-container">
+    <canvas id="lakePiruStorageChart"></canvas>
+    </div>
+
     <div id="lakePiruStorage"></div>
     <br>
 
