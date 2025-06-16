@@ -120,7 +120,7 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
                                     tooltipFormat: 'MMM d, yyyy', // Changed 'MMM D, yyyy' to 'MMM d, yyyy'
                                     displayFormats: {
                                         // CHANGE D to d HERE:
-                                        day: 'MMM d', // Changed 'MMM D' to 'MMM d'
+                                        day: 'MMM d, yyyy', // Changed 'MMM D' to 'MMM d'
                                         month: 'MMM yyyy',
                                         year: 'yyyy'
                                     }
