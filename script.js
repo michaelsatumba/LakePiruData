@@ -322,11 +322,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const endInput = document.getElementById('endDate');
     const fetchBtn = document.getElementById('fetchDataBtn');
 
-    // Set default dates (last 3 months)
+    // Set default dates (last 1 year)
     const today = new Date();
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(today.getMonth() - 3);
-    startInput.value = formatDate(threeMonthsAgo);
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    startInput.value = formatDate(oneYearAgo);
     endInput.value = formatDate(today);
 
     fetchBtn.addEventListener('click', () => {
