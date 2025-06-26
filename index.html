@@ -17,7 +17,7 @@
     color: #e0e0e0;
 }
 
-table {
+#lakePiruStorageTable, #piruCreekDischargeTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
@@ -177,8 +177,7 @@ a {
     margin: 20px auto;
 }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
 </head>
 <body>
     <h1>Lake Piru Storage Data and Flow Rate</h1>
@@ -208,9 +207,9 @@ a {
     <div id="dischargeLoadingMessage">Loading discharge data...</div>
     <div id="piruCreekDischarge"></div>
 
-    
-
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
         const LAKE_PIRU_CAPACITY_ACFT = 83240; // Approximate full capacity of Lake Piru in acre-feet
 
 // Helper to format date as YYYY-MM-DD
@@ -384,7 +383,7 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
 
 
             let tableHTML = `
-                <table>
+                <table id="lakePiruStorageTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -482,7 +481,7 @@ async function fetchPiruCreekDischargeByRange(startDate, endDate) {
                 `;
 
             let tableHTML = `
-                <table>
+                <table id="piruCreekDischargeTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -556,5 +555,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchPiruCreekDischargeByRange(startInput.value, endInput.value);
 });
     </script>
+
 </body>
 </html>
