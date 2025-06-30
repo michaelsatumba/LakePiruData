@@ -280,7 +280,7 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
             let warning = '';
             if (daysOld > 7) {
                 warning = `<div style="color: orange; font-weight: bold; margin-bottom: 8px;">
-                    Warning: Latest data is ${daysOld} days old (last update: ${latestDate.toLocaleDateString('en-US')})
+                    Advisory: Latest data is ${daysOld} days old (last update: ${latestDate.toLocaleDateString('en-US')})
                 </div>`;
             }
 
