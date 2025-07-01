@@ -171,7 +171,7 @@ a {
     background: #357ab8;
 }
 
-.chart-container, .piruCreekDischargeChartContainer {
+.lakePiruStoragechart-container, .piruCreekDischargeChartContainer {
     position: relative; 
     height:60vh; 
     margin: 20px auto;
