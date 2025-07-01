@@ -1,11 +1,11 @@
-body {
+        body {
     font-family: sans-serif;
     margin: 20px;
     background-color: #181a1b;
     color: #e0e0e0;
 }
 
-table {
+#lakePiruStorageTable, #piruCreekDischargeTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
@@ -70,39 +70,48 @@ a {
     border-radius: 4px;
 }
 
+/* gauge bar */
 .gauge-bar {
-    width: 100%;
-    max-width: 400px;
-    height: 32px;
+    width: 60px;
+    height: 300px;
     background: #232526;
-    border-radius: 16px;
+    border-radius: 32px;
     margin: 10px 0 20px 0;
     position: relative;
     box-shadow: 0 1px 4px #0006;
     border: 1px solid #333;
     overflow: hidden;
     display: flex;
+    flex-direction: column-reverse;
     align-items: center;
+    justify-content: flex-end;
 }
 
 .gauge-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #4da3ff 0%, #4dd17c 100%);
-    border-radius: 16px 0 0 16px;
-    transition: width 0.8s cubic-bezier(.4,2,.3,1);
+    width: 100%;
+    background: linear-gradient(0deg, #4da3ff 0%, #4dd17c 100%);
+    border-radius: 0 0 32px 32px;
+    transition: height 0.8s cubic-bezier(.4,2,.3,1);
+    position: absolute;
+    bottom: 0;
+    left: 0;
 }
 
 .gauge-labels {
     position: absolute;
+    height: 100%;
     width: 100%;
-    top: 0;
     left: 0;
+    top: 0;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.95em;
     color: #aaa;
-    padding: 0 10px;
+    padding: 10px 0;
     pointer-events: none;
+    z-index: 3;
 }
 
 .gauge-labels span {
@@ -113,7 +122,7 @@ a {
 }
 
 .gauge-labels span:last-child {
-    margin-right: 20px; /* Adjust this value as needed */
+    margin-bottom: 18px; /* Adjust this value as needed */
 }
 
 .gauge-percent {
@@ -125,6 +134,9 @@ a {
     z-index: 2;
     font-size: 1.1em;
     letter-spacing: 1px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /* Dark theme for date inputs and button */
@@ -159,7 +171,7 @@ a {
     background: #357ab8;
 }
 
-.chart-container {
+.chart-container, .piruCreekDischargeChartContainer {
     position: relative; 
     height:60vh; 
     margin: 20px auto;

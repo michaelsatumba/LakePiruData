@@ -1,3 +1,4 @@
+
 const LAKE_PIRU_CAPACITY_ACFT = 83240; // Approximate full capacity of Lake Piru in acre-feet
 
 // Helper to format date as YYYY-MM-DD
@@ -55,11 +56,11 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
             const gaugeContainer = document.getElementById('lakePiruGauge');
             gaugeContainer.innerHTML = `
             <div class="gauge-labels">
-                <span>E</span>
                 <span>F</span>
+                <span>E</span>
             </div>
             <div class="gauge-percent">${percentCapacity}%</div>
-            <div class="gauge-fill" style="width: ${percentCapacity}%;"></div>
+            <div class="gauge-fill" style="height: ${percentCapacity}%;"></div>
             `;
 
             // Check if data is stale (older than 7 days)
@@ -68,7 +69,7 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
             let warning = '';
             if (daysOld > 7) {
                 warning = `<div style="color: orange; font-weight: bold; margin-bottom: 8px;">
-                    Warning: Latest data is ${daysOld} days old (last update: ${latestDate.toLocaleDateString('en-US')})
+                    Advisory: Latest data is ${daysOld} days old (last update: ${latestDate.toLocaleDateString('en-US')})
                 </div>`;
             }
 
@@ -171,7 +172,7 @@ async function fetchLakePiruStorageByRange(startDate, endDate) {
 
 
             let tableHTML = `
-                <table>
+                <table id="lakePiruStorageTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -239,9 +240,16 @@ async function fetchPiruCreekDischargeByRange(startDate, endDate) {
 
     const loadingMessage = document.getElementById('dischargeLoadingMessage');
     const dischargeDataContainer = document.getElementById('piruCreekDischarge');
+    const chartCanvas = document.getElementById('piruCreekDischargeChart'); // Get the canvas
 
     loadingMessage.textContent = 'Loading discharge data...';
     dischargeDataContainer.innerHTML = '';
+
+    // Ensure the canvas context is available
+    let ctx = null;
+    if (chartCanvas) {
+        ctx = chartCanvas.getContext('2d');
+    }
 
     try {
         const response = await fetch(apiUrl);
@@ -268,8 +276,89 @@ async function fetchPiruCreekDischargeByRange(startDate, endDate) {
                 </div>
                 `;
 
+            // Prepare data for Chart.js
+            const chartData = data.features
+                .filter(feature => feature.properties.value !== null && feature.properties.value !== undefined)
+                .map(feature => ({
+                    x: new Date(feature.properties.time),
+                    y: parseFloat(feature.properties.value)
+                })).reverse();
+
+            // Destroy existing chart if it exists
+            if (piruCreekDischargeChart instanceof Chart) {
+                piruCreekDischargeChart.destroy();
+                piruCreekDischargeChart = null;
+            }
+
+            // Only create the chart if there is data and canvas/context
+            if (chartData.length > 0 && ctx) {
+                piruCreekDischargeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Piru Creek Discharge (ft³/s)',
+                            data: chartData,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            fill: false,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'MMM d, yyyy',
+                                    displayFormats: {
+                                        day: 'MMM d, yyyy',
+                                        month: 'MMM yyyy',
+                                        year: 'yyyy'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Discharge (ft³/s)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toLocaleString() + ' ft³/s';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
             let tableHTML = `
-                <table>
+                <table id="piruCreekDischargeTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -308,11 +397,19 @@ async function fetchPiruCreekDischargeByRange(startDate, endDate) {
             dischargeDataContainer.innerHTML = summaryHTML + tableHTML;
         } else {
             dischargeDataContainer.innerHTML = '<p>No discharge data found for Piru Creek in the selected period.</p>';
+            if (piruCreekDischargeChart instanceof Chart) {
+                piruCreekDischargeChart.destroy();
+                piruCreekDischargeChart = null;
+            }
         }
     } catch (error) {
         console.error('Error fetching Piru Creek discharge data:', error);
         loadingMessage.style.display = 'none';
         dischargeDataContainer.innerHTML = `<p style="color: red;">Failed to load discharge data: ${error.message}</p>`;
+        if (piruCreekDischargeChart instanceof Chart) {
+            piruCreekDischargeChart.destroy();
+            piruCreekDischargeChart = null;
+        }
     }
 }
 
