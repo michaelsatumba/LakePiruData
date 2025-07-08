@@ -413,6 +413,214 @@ async function fetchPiruCreekDischargeByRange(startDate, endDate) {
     }
 }
 
+// Global variable to hold the Chart instance
+let castaicOutflowChart = null;
+
+/**
+ * Fetches and displays Castaic Reservoir Outflow data from CDEC via a proxy server.
+ * @param {string} startDate - The start date in 'YYYY-MM-DD' format.
+ * @param {string} endDate - The end date in 'YYYY-MM-DD' format.
+ */
+async function fetchCastaicOutflowByRange(startDate, endDate) {
+    // Define the base URL for your proxy server
+    // IMPORTANT: Replace 'http://localhost:3000' with your actual proxy server's domain
+    // when deploying to production (e.g., 'https://your-proxy-domain.com').
+    const proxyBaseUrl = 'https://cdec-proxy.vercel.app/';
+
+    // Parameters for the CDEC API, which will be passed through the proxy
+    const params = {
+        Stations: 'CAS',
+        SensorNums: '23',
+        dur_code: 'H',
+        Start: startDate, // Use the dynamic startDate
+        End: endDate      // Use the dynamic endDate
+    };
+
+    // Construct the full URL for the proxy, including all query parameters
+    const queryString = new URLSearchParams(params).toString();
+    const proxyApiUrl = `${proxyBaseUrl}api/cdec-data?${queryString}`;
+
+    const loadingMessage = document.getElementById('castaicOutflowLoadingMessage');
+    const dataContainer = document.getElementById('castaicOutflow');
+    const chartCanvas = document.getElementById('castaicOutflowChart');
+
+    // Show loading message
+    loadingMessage.textContent = 'Loading outflow data...';
+    loadingMessage.style.display = '';
+    dataContainer.innerHTML = ''; // Clear previous data
+
+    let ctx = null;
+    if (chartCanvas) {
+        ctx = chartCanvas.getContext('2d');
+    }
+
+    try {
+        // Fetch data from your proxy server
+        const response = await fetch(proxyApiUrl);
+
+        // Check if the response from the proxy is OK
+        if (!response.ok) {
+            // If the proxy itself returned an error (e.g., 500 from its internal fetch to CDEC)
+            const errorDetails = await response.text(); // Get error details from proxy
+            throw new Error(`Proxy error! Status: ${response.status}. Details: ${errorDetails}`);
+        }
+
+        const data = await response.json(); // Parse the JSON response
+
+        // Hide loading message
+        loadingMessage.style.display = 'none';
+
+        // Data is an array of objects
+        if (Array.isArray(data) && data.length > 0) {
+            // Filter valid points (value is not null, empty, or NaN)
+            const validData = data.filter(d => d.value !== null && d.value !== '' && !isNaN(Number(d.value)));
+
+            // Select up to 10 evenly spread points within the range for charting and table
+            let sampled = [];
+            if (validData.length <= 10) {
+                sampled = validData;
+            } else {
+                const step = (validData.length - 1) / 9;
+                for (let i = 0; i < 10; i++) {
+                    sampled.push(validData[Math.round(i * step)]);
+                }
+            }
+
+            // Prepare data points for Chart.js
+            const points = sampled.map(d => ({
+                x: new Date(d.date.replace(/-/g, '/')), // Ensure date is parsed correctly
+                y: Number(d.value)
+            }));
+
+            // Destroy existing chart instance if it exists to prevent memory leaks and redraw issues
+            if (castaicOutflowChart instanceof Chart) {
+                castaicOutflowChart.destroy();
+                castaicOutflowChart = null;
+            }
+
+            // Render the chart if there are valid points and a canvas context
+            if (points.length > 0 && ctx) {
+                castaicOutflowChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Castaic Reservoir Outflow (cfs)',
+                            data: points,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            fill: false,
+                            tension: 0.1 // Smooth the line
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Allow chart to fill container
+                        scales: {
+                            x: {
+                                type: 'time', // Use time scale for dates
+                                time: {
+                                    unit: 'day', // Display unit
+                                    tooltipFormat: 'MMM d, yyyy HH:mm', // Format for tooltips
+                                    displayFormats: { // How to display labels on the axis
+                                        hour: 'MMM d, HH:mm',
+                                        day: 'MMM d, yyyy',
+                                        month: 'MMM yyyy',
+                                        year: 'yyyy'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true, // Start Y-axis at zero
+                                title: {
+                                    display: true,
+                                    text: 'Outflow (cfs)'
+                                },
+                                ticks: {
+                                    // Format Y-axis labels with locale-specific thousands separators
+                                    callback: function(value) {
+                                        return value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toLocaleString() + ' cfs';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Message if no data for chart
+                dataContainer.innerHTML = '<p>No valid outflow data found for Castaic in the selected period to display on chart.</p>';
+            }
+
+            const reversedSampledData = [...sampled].reverse();
+
+            // Generate and display the data table
+            let tableHTML = `
+                <table id="castaicOutflowTable" class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm mt-4">
+                    <thead>
+                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 border-b border-gray-300">Date/Time</th>
+                            <th class="py-3 px-6 border-b border-gray-300">Outflow (cfs)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700 text-sm font-light">
+            `;
+            reversedSampledData.forEach(d => {
+                const dateObj = new Date(d.date.replace(/-/g, '/'));
+                const dateString = dateObj.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                });
+                tableHTML += `
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 whitespace-nowrap">${dateString}</td>
+                        <td class="py-3 px-6">${Number(d.value).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            dataContainer.innerHTML += tableHTML; // Append table after chart message
+        } else {
+            // Message if no data at all
+            dataContainer.innerHTML = '<p>No outflow data found for Castaic in the selected period.</p>';
+            // Destroy chart if no data is available
+            if (castaicOutflowChart instanceof Chart) {
+                castaicOutflowChart.destroy();
+                castaicOutflowChart = null;
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching Castaic outflow data:', error);
+        loadingMessage.style.display = 'none';
+        dataContainer.innerHTML = `<p style="color: red; font-weight: bold;">Failed to load outflow data: ${error.message}</p>`;
+        // Ensure chart is destroyed on error
+        if (castaicOutflowChart instanceof Chart) {
+            castaicOutflowChart.destroy();
+            castaicOutflowChart = null;
+        }
+    }
+}
+
 // Listen for date range changes
 document.addEventListener('DOMContentLoaded', () => {
     const startInput = document.getElementById('startDate');
@@ -432,10 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (start && end && start <= end) {
             fetchLakePiruStorageByRange(start, end);
             fetchPiruCreekDischargeByRange(start, end);
+            fetchCastaicOutflowByRange(start, end);
         }
     });
 
     // Initial load
     fetchLakePiruStorageByRange(startInput.value, endInput.value);
     fetchPiruCreekDischargeByRange(startInput.value, endInput.value);
+    fetchCastaicOutflowByRange(startInput.value, endInput.value);
 });
