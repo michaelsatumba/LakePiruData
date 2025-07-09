@@ -587,6 +587,8 @@ async function fetchCastaicOutflowByRange(startDate, endDate) {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                 });
                 tableHTML += `
                     <tr class="border-b border-gray-200 hover:bg-gray-100">
