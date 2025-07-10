@@ -176,3 +176,7 @@ a {
     height:60vh; 
     margin: 20px auto;
 }
+
+#castaicOutflowTableHeader {
+    color:#000;
+}

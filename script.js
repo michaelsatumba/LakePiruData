@@ -572,28 +572,28 @@ async function fetchCastaicOutflowByRange(startDate, endDate) {
 
             // Generate and display the data table
             let tableHTML = `
-                <table id="castaicOutflowTable" class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm mt-4">
+                <table id="castaicOutflowTable">
                     <thead>
-                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 border-b border-gray-300">Date/Time</th>
-                            <th class="py-3 px-6 border-b border-gray-300">Outflow (cfs)</th>
+                        <tr id="castaicOutflowTableHeader">
+                            <th>Date/Time</th>
+                            <th>Outflow (cfs)</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-700 text-sm font-light">
+                    <tbody>
             `;
             reversedSampledData.forEach(d => {
                 const dateObj = new Date(d.date.replace(/-/g, '/'));
                 const dateString = dateObj.toLocaleString('en-US', {
                     year: 'numeric',
                     month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    day: 'numeric'
+                    // hour: '2-digit',
+                    // minute: '2-digit'
                 });
                 tableHTML += `
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
-                        <td class="py-3 px-6 whitespace-nowrap">${dateString}</td>
-                        <td class="py-3 px-6">${Number(d.value).toLocaleString()}</td>
+                    <tr>
+                        <td>${dateString}</td>
+                        <td>${Number(d.value).toLocaleString()}</td>
                     </tr>
                 `;
             });
