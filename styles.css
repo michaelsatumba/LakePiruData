@@ -115,7 +115,7 @@ a {
     transform: translate(-50%, -50%);
 }
 
-/* Dark theme for date inputs and button */
+
 #startDate, #endDate {
     background: #fff;
     color: #000;
