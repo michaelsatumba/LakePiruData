@@ -1,16 +1,12 @@
 body {
     font-family: sans-serif;
     margin: 20px;
-    background-color: #181a1b;
-    color: #e0e0e0;
 }
 
 #lakePiruStorageTable, #piruCreekDischargeTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background-color: #232526;
-    color: #e0e0e0;
 }
 
 th, td {
@@ -19,25 +15,11 @@ th, td {
     text-align: left;
 }
 
-th {
-    background-color: #222326;
-    color: #f8f8f8;
-}
-
-tr:nth-child(even) {
-    background-color: #202224;
-}
-
-tr:nth-child(odd) {
-    background-color: #232526;
-}
-
 /* Style for current storage display */
 .current-storage-summary {
     font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #e0e0e0;
 }
 
 .current-storage-summary span {
@@ -48,7 +30,6 @@ tr:nth-child(odd) {
     font-size: 1.2em;
     font-weight: bold;
     margin-bottom: 15px;
-    color: #e0e0e0;
 }
 
 .discharge-summary span {
@@ -58,11 +39,6 @@ tr:nth-child(odd) {
 /* Miscellaneous */
 a {
     color: #4da3ff;
-}
-
-#timePeriodControls label,
-#timePeriodControls select {
-    color: #e0e0e0;
 }
 
 #timePeriodControls select {
@@ -175,8 +151,4 @@ a {
     position: relative; 
     height:60vh; 
     margin: 20px auto;
-}
-
-#castaicOutflowTableHeader {
-    color:#000;
 }
